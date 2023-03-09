@@ -1,3 +1,5 @@
+//TODO - Add high-scores
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -10,7 +12,7 @@ using namespace std;
 class Word {
 private:
     static int RandomNumber() {
-        //Select seed from current time
+        //Select seed from current time and generate random number
         srand(time(nullptr));
         int randomNum = rand() % 7776;
         return randomNum;
@@ -33,13 +35,15 @@ public:
         for (int i = 0; i < n; i++) {
             file >> word[i];
         }
+        //Select random word from random number
         string wordSelected = word[randomNum];
-        cout << wordSelected << endl;
+        //cout << wordSelected << endl;
         return wordSelected;
 
     }
 
     static void WordSymbols() {
+        // Draw _ for each letter in word
         WordSelect();
         int wordLength = WordSelect().length();
         cout << "Word to guess:" << endl;
@@ -50,67 +54,72 @@ public:
     }
 };
 
-class Difficulty {
-public:
-    static int DifficultySelect() {
-        int difficulty;
-        int guesses;
-        cout << "Select difficulty: " << endl;
-        cout << "1. Easy" << endl;
-        cout << "2. Medium" << endl;
-        cout << "3. Hard" << endl;
-        cout << "4. Insane" << endl;
-        cout << "5. Impossible" << endl;
-        cin >> difficulty;
-        //check if input is valid
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(256, '\n');
+
+static int DifficultySelect() {
+    //Select difficulty. Difficulty determines number of guesses
+    int difficulty;
+    int guesses;
+    cout << "Select difficulty: " << endl;
+    cout << "1. Easy" << endl;
+    cout << "2. Medium" << endl;
+    cout << "3. Hard" << endl;
+    cout << "4. Insane" << endl;
+    cout << "5. Impossible" << endl;
+    cin >> difficulty;
+    //check if input is valid
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(256, '\n');
+        cout << "Invalid input" << endl;
+        return 0;
+    }
+    switch (difficulty) {
+        case 1:
+            cout << "Easy" << endl;
+            guesses = 10;
+            return guesses;
+        case 2:
+            cout << "Medium" << endl;
+            guesses = 7;
+            return guesses;
+        case 3:
+            cout << "Hard" << endl;
+            guesses = 5;
+            return guesses;
+        case 4:
+            cout << "Insane" << endl;
+            guesses = 3;
+            return guesses;
+        case 5:
+            cout << "Impossible" << endl;
+            guesses = 1;
+            return guesses;
+        case 6:
+            //Easter egg for testing
+            cout << "Instant fail" << endl;
+            guesses = 0;
+            return guesses;
+        default:
             cout << "Invalid input" << endl;
             return 0;
-        }
-        switch (difficulty) {
-            case 1:
-                cout << "Easy" << endl;
-                guesses = 10;
-                return guesses;
-            case 2:
-                cout << "Medium" << endl;
-                guesses = 7;
-                return guesses;
-            case 3:
-                cout << "Hard" << endl;
-                guesses = 5;
-                return guesses;
-            case 4:
-                cout << "Insane" << endl;
-                guesses = 3;
-                return guesses;
-            case 5:
-                cout << "Impossible" << endl;
-                guesses = 1;
-                return guesses;
-            case 6:
-                //Easter egg for testing
-                cout << "Instant fail" << endl;
-                guesses = 0;
-                return guesses;
-            default:
-                cout << "Invalid input" << endl;
-                return 0;
-        }
     }
-};
+}
+
 
 class Game {
 public:
-    static void GameStart() {
-        int guesses = Difficulty::DifficultySelect();
-        Word::WordSymbols();
-        string word = Word::WordSelect();
-        int wordLength = word.length();
+    int guesses = 0;
+    int wordLength = 0;
+    vector<char> guessedLetters;
+
+    void GameStart() {
+        string word;
+        guesses = DifficultySelect();
+        word = Word::WordSelect();
+        wordLength = word.length();
+        guessedLetters.clear();
         int correctLetters = 0;
-        vector<char> guessedLetters;
+        Word::WordSymbols();
 
         while (guesses > 0) {
             cout << "Guess a letter: ";
@@ -130,11 +139,8 @@ public:
                 cout << "You already guessed that letter" << endl;
                 continue;
             }
-
             guessedLetters.push_back(letter);
 
-
-            // Replace _ with letter
             bool foundLetter = false;
 
             // Replace _ with letter or show already guessed letters
@@ -157,8 +163,6 @@ public:
                     }
                 }
             }
-
-
             cout << endl;
 
             // Check if letter is in word
@@ -181,6 +185,7 @@ public:
             cout << "The word was: " << word << endl;
             cout << "You guessed " << correctLetters << " letters correctly" << endl;
         }
+
         cout << "Play again? (y/n)" << endl;
         char playAgain;
         cin >> playAgain;
@@ -197,6 +202,10 @@ public:
             cout << "Returning to menu" << endl;
         }
     }
+};
+
+class HighScores {
+public:
 
 };
 
@@ -221,12 +230,11 @@ int main() {
             cout << "Invalid input" << endl;
             continue;
         }
-
+        Game game;
         switch (choice) {
             case 1:
                 cout << "Starting game" << endl;
-                Game::GameStart();
-
+                game.GameStart();
                 break;
             case 2:
                 cout << "High-scores" << endl;
