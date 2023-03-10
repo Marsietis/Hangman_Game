@@ -64,7 +64,6 @@ public:
     static int DifficultySelect() {
         int difficultyChoice;
         int guesses;
-        //Select difficulty. Difficulty determines number of guesses
 
         cin >> difficultyChoice;
         CheckInput();
@@ -181,15 +180,15 @@ private:
     int wordLength;
     char letter{};
     int guesses;
-    bool foundLetter;
+    bool foundLetter{};
     int correctLetters;
 
 public:
     Hangman() {
         wordToGuess = Word::WordSelect();
+        //wordLength has to be set to number of unique letters in the word
         wordLength = wordToGuess.length();
         guesses = 0;
-        foundLetter = false;
         correctLetters = 0;
     }
 
@@ -243,16 +242,12 @@ public:
         for (int i = 0; i < wordLength; i++) {
             if (wordToGuess[i] == letter) {
                 foundLetter = true;
-                break;
+                correctLetters++;
+
             }
         }
-        CheckLetter2();
-    }
-
-    void CheckLetter2() {
         if (foundLetter) {
             cout << "Correct!" << endl;
-            correctLetters++;
             ReplaceUnderscore();
         } else {
             cout << "Wrong!" << endl;
@@ -261,6 +256,7 @@ public:
 
         cout << "Guesses left: " << guesses << endl;
     }
+
 
     void CheckIfGuessed() {
         for (char c: guessedLetters) {
@@ -282,8 +278,6 @@ public:
         for (int i = 0; i < wordLength; i++) {
             if (wordToGuess[i] == letter) {
                 cout << letter << " ";
-
-                foundLetter = true;
             } else {
                 bool guessed = false;
                 for (char c: guessedLetters) {
@@ -308,20 +302,10 @@ public:
         } else {
             cout << "You won!" << endl;
         }
-
-        string name;
-        cout << "Enter your name: ";
-        cin >> name;
-
-        Score s;
-        s.SetName(name);
-        s.SetScore(guesses);
-        s.SaveScore();
-
         PlayAgain();
     }
 
-    static void PlayAgain() {
+    void PlayAgain() const {
         char playAgain;
         cout << "Play again? (y/n): ";
         cin >> playAgain;
@@ -330,6 +314,15 @@ public:
             Hangman newGame;
             newGame.GameInitialize();
         } else {
+
+            string name;
+            cout << "Enter your name: ";
+            cin >> name;
+
+            Score s;
+            s.SetName(name);
+            s.SetScore(guesses * 10);
+            s.SaveScore();
             cout << "Thanks for playing!" << endl;
             exit(0);
         }
@@ -337,7 +330,6 @@ public:
     }
 
 };
-
 
 int main() {
     int choice = 0;
