@@ -90,7 +90,7 @@ public:
                 guesses = 1;
                 return guesses;
             case 6:
-                //Easter egg for testing
+                //Easter egg
                 cout << "Instant fail" << endl;
                 guesses = 0;
                 return guesses;
@@ -182,6 +182,7 @@ private:
     int guesses;
     bool foundLetter{};
     int correctLetters;
+    int score{};
 
 public:
     Hangman() {
@@ -190,6 +191,7 @@ public:
         wordLength = wordToGuess.length();
         guesses = 0;
         correctLetters = 0;
+        score = 0;
     }
 
     void PrintUnderscores() const {
@@ -203,6 +205,7 @@ public:
         cout << "Welcome to Hangman!" << endl;
         Difficulty::difficultyMenu();
         guesses = Difficulty::DifficultySelect();
+        score += guesses * -1 + 10;
         cout << "The word to guess is: " << endl;
         PrintUnderscores();
         cout << endl;
@@ -248,6 +251,7 @@ public:
         }
         if (foundLetter) {
             cout << "Correct!" << endl;
+            score += 2;
             ReplaceUnderscore();
         } else {
             cout << "Wrong!" << endl;
@@ -321,7 +325,7 @@ public:
 
             Score s;
             s.SetName(name);
-            s.SetScore(guesses * 10);
+            s.SetScore(score);
             s.SaveScore();
             cout << "Thanks for playing!" << endl;
             exit(0);
