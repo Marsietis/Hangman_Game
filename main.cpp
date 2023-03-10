@@ -46,19 +46,10 @@ public:
         }
         return word[randomNum];
     }
-
-    // Prints underscores for each letter of the selected word
-    static void DrawWord() {
-        int wordLength = WordSelect().length();
-        for (int i = 0; i < wordLength; i++) {
-            cout << "_ ";
-        }
-    }
 };
 
 class Difficulty {
 public:
-
 
     static void difficultyMenu() {
         cout << "Select difficulty: " << endl;
@@ -110,17 +101,30 @@ public:
     }
 };
 
-class Game {
+class Hangman {
 private:
     vector<char> guessedLetters;
-    string wordToGuess = Word::WordSelect();
-    int wordLength = wordToGuess.length();
+    string wordToGuess;
+    int wordLength;
     char letter{};
-    int guesses{};
-    bool foundLetter{};
-    int correctLetters = 0;
+    int guesses;
+    bool foundLetter;
+    int correctLetters;
 
 public:
+    Hangman() {
+        wordToGuess = Word::WordSelect();
+        wordLength = wordToGuess.length();
+        guesses = 0;
+        foundLetter = false;
+        correctLetters = 0;
+    }
+
+    void PrintUnderscores() const {
+        for (int i = 0; i < wordLength; i++) {
+            cout << "_ ";
+        }
+    }
 
     void GameInitialize() {
         cout << wordToGuess << endl;
@@ -128,7 +132,7 @@ public:
         Difficulty::difficultyMenu();
         guesses = Difficulty::DifficultySelect();
         cout << "The word to guess is: " << endl;
-        Word::DrawWord();
+        PrintUnderscores();
         cout << endl;
         GameLoop();
     }
@@ -136,41 +140,47 @@ public:
     void GameLoop() {
         while (guesses > 0) {
             EnterLetter();
-            CheckIfGuessed();
-            ReplaceUnderscore();
             CheckLetter();
+            CheckIfWon();
+            if (correctLetters == wordLength) {
+                break;
+            }
         }
         GameOver();
-        PlayAgain();
-    }
-
-    void GameOver() {
-        cout << "The word was: " << wordToGuess << endl;
-        cout << "You guessed " << correctLetters << " letters correctly" << endl;
     }
 
     void EnterLetter() {
-        cout << "Enter a letter: ";
-        cin >> letter;
-        CheckInput();
-        guessedLetters.push_back(letter);
-    }
-
-    void CheckIfGuessed() {
-        if (find(guessedLetters.begin(), guessedLetters.end(), letter) != guessedLetters.end()) {
-            cout << "You already guessed that letter" << endl;
+        while (true) {
+            cout << "Enter a letter: ";
+            cin >> letter;
+            CheckInput();
+            CheckIfGuessed();
+            if (isalpha(letter)) {
+                letter = tolower(letter);
+                break;
+            } else {
+                cout << "Invalid input. Please enter a letter." << endl;
+            }
         }
         guessedLetters.push_back(letter);
-
-        foundLetter = false;
     }
 
     void CheckLetter() {
+        foundLetter = false;
+        for (int i = 0; i < wordLength; i++) {
+            if (wordToGuess[i] == letter) {
+                foundLetter = true;
+                break;
+            }
+        }
+        CheckLetter2();
+    }
+
+    void CheckLetter2() {
         if (foundLetter) {
             cout << "Correct!" << endl;
-            if (correctLetters == wordLength) {
-                cout << "You won!" << endl;
-            }
+            correctLetters++;
+            ReplaceUnderscore();
         } else {
             cout << "Wrong!" << endl;
             guesses--;
@@ -179,11 +189,27 @@ public:
         cout << "Guesses left: " << guesses << endl;
     }
 
+    void CheckIfGuessed() {
+        for (char c: guessedLetters) {
+            if (c == letter) {
+                cout << "You already guessed that letter" << endl;
+                EnterLetter();
+            }
+        }
+    }
+
+    void CheckIfWon() const {
+        if (correctLetters == wordLength) {
+            cout << "You won!" << endl;
+            PlayAgain();
+        }
+    }
+
     void ReplaceUnderscore() {
         for (int i = 0; i < wordLength; i++) {
             if (wordToGuess[i] == letter) {
                 cout << letter << " ";
-                correctLetters++;
+
                 foundLetter = true;
             } else {
                 bool guessed = false;
@@ -202,23 +228,31 @@ public:
         cout << endl;
     }
 
-    void PlayAgain() {
+    void GameOver() {
+        cout << "The word was: " << wordToGuess << endl;
+        cout << "You guessed " << correctLetters << " letters correctly" << endl;
+        PlayAgain();
+    }
+
+    static void PlayAgain() {
         char playAgain;
         cout << "Play again? (y/n): ";
         cin >> playAgain;
         CheckInput();
         if (playAgain == 'y') {
-            GameInitialize();
+            Hangman newGame;
+            newGame.GameInitialize();
         } else {
             cout << "Thanks for playing!" << endl;
             exit(0);
         }
+
     }
 };
 
 int main() {
     int choice = 0;
-    Game game;
+    Hangman game;
     do {
         MainMenu();
         cin >> choice;
