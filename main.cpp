@@ -8,6 +8,8 @@
 
 using namespace std;
 
+void Title();
+
 void CheckInput() {
     if (cin.fail()) {
         cin.clear();
@@ -201,7 +203,6 @@ public:
     }
 
     void GameInitialize() {
-        cout << wordToGuess << endl;
         cout << "Welcome to Hangman!" << endl;
         Difficulty::difficultyMenu();
         guesses = Difficulty::DifficultySelect();
@@ -339,6 +340,7 @@ int main() {
     int choice = 0;
     Hangman game;
     Score score;
+    Title();
     do {
         MainMenu();
         cin >> choice;
@@ -359,4 +361,16 @@ int main() {
                 break;
         }
     } while (choice != 3);
+}
+
+void Title() {
+    cout << " __  __                                                           \n"
+            "/\\ \\/\\ \\                                                          \n"
+            "\\ \\ \\_\\ \\     __      ___      __     ___ ___      __      ___    \n"
+            " \\ \\  _  \\  /'__`\\  /' _ `\\  /'_ `\\ /' __` __`\\  /'__`\\  /' _ `\\  \n"
+            "  \\ \\ \\ \\ \\/\\ \\L\\.\\_/\\ \\/\\ \\/\\ \\L\\ \\/\\ \\/\\ \\/\\ \\/\\ \\L\\.\\_/\\ \\/\\ \\ \n"
+            "   \\ \\_\\ \\_\\ \\__/.\\_\\ \\_\\ \\_\\ \\____ \\ \\_\\ \\_\\ \\_\\ \\__/.\\_\\ \\_\\ \\_\\\n"
+            "    \\/_/\\/_/\\/__/\\/_/\\/_/\\/_/\\/___L\\ \\/_/\\/_/\\/_/\\/__/\\/_/\\/_/\\/_/\n"
+            "                               /\\____/                            \n"
+            "                               \\_/__/                             " << endl;
 }
