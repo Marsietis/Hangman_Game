@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -63,7 +64,6 @@ public:
     static int DifficultySelect() {
         int difficultyChoice;
         int guesses;
-        //Select difficulty. Difficulty determines number of guesses
 
         cin >> difficultyChoice;
         CheckInput();
@@ -101,22 +101,94 @@ public:
     }
 };
 
-class Hangman {
+class Score {
+private:
+    string playerName;
+    int playerScore;
+
+public:
+    Score() {
+        playerName = "";
+        playerScore = 0;
+    }
+
+    void SetName(string name) {
+        playerName = std::move(name);
+    }
+
+    void SetScore(int score) {
+        playerScore = score;
+    }
+
+    [[nodiscard]] string GetName() const {
+        return playerName;
+    }
+
+    [[nodiscard]] int GetScore() const {
+        return playerScore;
+    }
+
+    void SaveScore() const {
+        ofstream file;
+        file.open("highscores.txt", ios::app);
+        file << playerName << " " << playerScore << endl;
+        file.close();
+    }
+
+    static vector<Score> LoadScores() {
+        vector<Score> scores;
+        ifstream file("highscores.txt");
+        if (file.is_open()) {
+            string name;
+            int score;
+            while (file >> name >> score) {
+                Score s;
+                s.SetName(name);
+                s.SetScore(score);
+                scores.push_back(s);
+            }
+            file.close();
+        }
+        return scores;
+    }
+
+    static void DisplayScores() {
+        cout << "High Scores:" << endl;
+        vector<Score> scores = Score::LoadScores();
+        if (scores.empty()) {
+            cout << "No scores to display" << endl;
+            return;
+        }
+
+        // Sort scores in descending order
+        sort(scores.begin(), scores.end(), [](const Score &a, const Score &b) {
+            return a.GetScore() > b.GetScore();
+        });
+
+        for (const Score &s: scores) {
+            cout << s.GetName() << ": " << s.GetScore() << endl;
+        }
+    }
+
+
+};
+
+class Hangman : public Score {
 private:
     vector<char> guessedLetters;
     string wordToGuess;
     int wordLength;
     char letter{};
     int guesses;
-    bool foundLetter;
+    bool foundLetter{};
     int correctLetters;
 
 public:
     Hangman() {
         wordToGuess = Word::WordSelect();
+        //wordLength has to be set to number of unique letters in the word
         wordLength = wordToGuess.length();
         guesses = 0;
-        foundLetter = false;
         correctLetters = 0;
     }
 
@@ -170,16 +242,12 @@ public:
         for (int i = 0; i < wordLength; i++) {
             if (wordToGuess[i] == letter) {
                 foundLetter = true;
-                break;
+                correctLetters++;
+
             }
         }
-        CheckLetter2();
-    }
-
-    void CheckLetter2() {
         if (foundLetter) {
             cout << "Correct!" << endl;
-            correctLetters++;
             ReplaceUnderscore();
         } else {
             cout << "Wrong!" << endl;
@@ -188,6 +256,7 @@ public:
 
         cout << "Guesses left: " << guesses << endl;
     }
+
 
     void CheckIfGuessed() {
         for (char c: guessedLetters) {
@@ -209,8 +278,6 @@ public:
         for (int i = 0; i < wordLength; i++) {
             if (wordToGuess[i] == letter) {
                 cout << letter << " ";
-
-                foundLetter = true;
             } else {
                 bool guessed = false;
                 for (char c: guessedLetters) {
@@ -229,12 +296,16 @@ public:
     }
 
     void GameOver() {
-        cout << "The word was: " << wordToGuess << endl;
-        cout << "You guessed " << correctLetters << " letters correctly" << endl;
+        cout << "Game Over!" << endl;
+        if (guesses == 0) {
+            cout << "You lost! The word was " << wordToGuess << endl;
+        } else {
+            cout << "You won!" << endl;
+        }
         PlayAgain();
     }
 
-    static void PlayAgain() {
+    void PlayAgain() const {
         char playAgain;
         cout << "Play again? (y/n): ";
         cin >> playAgain;
@@ -243,16 +314,27 @@ public:
             Hangman newGame;
             newGame.GameInitialize();
         } else {
+
+            string name;
+            cout << "Enter your name: ";
+            cin >> name;
+
+            Score s;
+            s.SetName(name);
+            s.SetScore(guesses * 10);
+            s.SaveScore();
             cout << "Thanks for playing!" << endl;
             exit(0);
         }
 
     }
+
 };
 
 int main() {
     int choice = 0;
     Hangman game;
+    Score score;
     do {
         MainMenu();
         cin >> choice;
@@ -263,6 +345,7 @@ int main() {
                 break;
             case 2:
                 cout << "Scores" << endl;
+                Score::DisplayScores();
                 break;
             case 3:
                 cout << "Thanks for playing!" << endl;
